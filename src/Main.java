@@ -44,7 +44,10 @@ public class Main {
 	
 	public static void testPrimes3Ways(){
 		reset();
+		long start = System.nanoTime();
 		lllock();
+		long end = System.nanoTime();
+		timeInNS[0] = end - start;
 		System.out.println("LLLock Done");
 		try {
 			Thread.sleep(500);
@@ -53,7 +56,10 @@ public class Main {
 			e.printStackTrace();
 		}
 		reset();
+		start = System.nanoTime();
 		otlock();
+		end = System.nanoTime();
+		timeInNS[1] = end - start;
 		System.out.println("OTLocks Done");
 		try {
 			Thread.sleep(500);
@@ -74,8 +80,7 @@ public class Main {
 		for (int i = 0; i < threads.length; i++) {
 			threads[i] = new Thread(new PrimeFinderLongLived(lock));
 		}
-		//GO
-		long start = System.nanoTime();
+		
 		for (int i = 0; i < threads.length; i++) {
 			
 			threads[i].start();
@@ -88,9 +93,7 @@ public class Main {
 				e.printStackTrace();
 			}
 		}
-		//Done!
-		long stop = System.nanoTime();
-		timeInNS[0] = stop - start;
+		
 		
 	}
 	public static void otlock(){
@@ -103,8 +106,8 @@ public class Main {
 		for (int i = 0; i < threads.length; i++) {
 			threads[i] = new Thread(new PrimeFinderOneTime(locks));
 		}
-		//GO
-		long start = System.nanoTime();
+		
+		
 		for (int i = 0; i < threads.length; i++) {
 			
 			threads[i].start();
@@ -117,9 +120,6 @@ public class Main {
 				e.printStackTrace();
 			}
 		}
-		//Done!
-		long stop = System.nanoTime();
-		timeInNS[1] = stop - start;
 		
 	}
 	public static void lockFree(){

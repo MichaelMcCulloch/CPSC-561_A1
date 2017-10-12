@@ -1,27 +1,34 @@
 
 public class LLLock {
-	public static volatile boolean[] flags;
-	public static volatile int victim = -1;
+	private volatile int[] level;
+	private volatile int[] victim;
+	private int n;
 	
 	public LLLock(int nThreads){
-		flags = new boolean[nThreads];
+		n = nThreads;
+		level = new int[nThreads];
+		victim = new int[nThreads];
+		for (int i = 0; i < nThreads; i++) {
+			level[i] = 0;
+			victim[i] = -1;
+		}
 	}
-	public void lock(int pid){
-		flags[pid] = true;
-		victim = pid;
-		boolean others = false;
-		
-		while (victim == pid && others){ //while the victim, scan the list
-			for (int i = 0; i < flags.length; i++) {
-				if (i != pid && flags[i]) {
-					others = true;
-					break;
-				}
+	
+	public void lock(){
+		int pid = (int)Thread.currentThread().getId() % n;
+		for (int i = 1; i < n; i++) { //each level
+			level[pid] = 1;
+			victim[i] = pid;
+			for (int j = 0; j < n; j++) { //each thread
+				while (j != pid && level[j] >= i && victim[i] == pid){}
 			}
 		}
 	}
-	public void release(int pid){
-		flags[pid] = false;
-	}
+	
+	public void unlock() {
+        int pid = (int)Thread.currentThread().getId() % n;
+        level[pid] = 0;
+    }
+	
 	
 }

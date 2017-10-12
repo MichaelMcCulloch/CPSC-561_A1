@@ -1,43 +1,47 @@
 
 public class OTLock {
-	public static volatile boolean[] flags;
-	public static volatile boolean timeOut = false;
-	public static volatile int victim = -1;
-
-	public OTLock(int threads){
-		flags = new boolean[threads];
-		for (int i = 0; i < threads; i++){
-			flags[i] = false;
+	private volatile boolean tooLate;
+	private volatile int[] level;
+	private volatile int[] victim;
+	private int n;
+	
+	public OTLock(int nThreads){
+		tooLate = false;
+		n = nThreads;
+		level = new int[nThreads];
+		victim = new int[nThreads];
+		for (int i = 0; i < nThreads; i++) {
+			level[i] = 0;
+			victim[i] = -1;
 		}
 	}
 	
-	public boolean lock(int pid){
+	public boolean lock(){
+		//fastpath
+		if (tooLate) return false;
 		
-		if (timeOut) return false;
-		flags[pid] = true;
-		victim = pid;
-		boolean others = false;
-		
-		while (victim == pid && others){ //while the victim, scan the list
-			for (int i = 0; i < flags.length; i++) {
-				if (i != pid && flags[i]) {
-					others = true;
-					break;
-				}
+		//compete
+		int pid = (int)Thread.currentThread().getId() % n;
+		for (int i = 1; i < n; i++) { //each level
+			level[pid] = 1;
+			victim[i] = pid;
+			for (int j = 0; j < n; j++) { //each thread
+				while (j != pid && level[j] >= i && victim[i] == pid){}
 			}
 		}
-		//This section is Mutually Exclusive up to 'flags[pid] = false;'
 		
-		if (timeOut) {
+		//check for looser
+		if (tooLate){ //looser
+			level[pid] = 0;
 			return false;
-		}
-		else {
-			timeOut = true;
-			flags[pid] = false;
+		} else { //winner
+			tooLate = true;
+			level[pid] = 0;
 			return true;
 		}
-		
-		
-		
 	}
+	
+	
+	
+
 }

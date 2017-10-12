@@ -1,8 +1,8 @@
 
 public class OTLock {
-	public static boolean[] flags;
-	public static boolean timeOut = false;
-	public static int victim = -1;
+	public static volatile boolean[] flags;
+	public static volatile boolean timeOut = false;
+	public static volatile int victim = -1;
 
 	public OTLock(int threads){
 		flags = new boolean[threads];

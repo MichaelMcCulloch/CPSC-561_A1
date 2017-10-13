@@ -16,6 +16,14 @@ public class OTLock {
 		}
 	}
 	
+	public void reset(){
+		tooLate = false;
+		for (int i = 0; i < n; i++) {
+			level[i] = 0;
+			victim[i] = -1;
+		}
+	}
+	
 	public boolean lock(){
 		//fastpath
 		if (tooLate) return false;

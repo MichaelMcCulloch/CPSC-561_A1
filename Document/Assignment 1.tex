@@ -2,7 +2,7 @@
 \author{Michael McCulloch}
 \date{}
 
-\documentclass[12pt]{article}
+\documentclass[11pt]{article}
 \begin{document}
 \maketitle
 
@@ -18,6 +18,28 @@
 \paragraph{Starvation Freedom} is not satisfied here, as if a thread sleeps before executing line 3, another thread may re-acquire the lock infinitly many times.
 
 
+
+\section{Print Primes Varients}
+For a range of 62.5 million to 125 million:
+\begin{center}
+ \begin{tabular}{||c c c c c c c||}
+ \hline
+ Threads & 1 & 4 & 8 & 16 & 32 & Sum\\
+ \hline\hline
+ LLLock & 87.62 & 24.28 & 20.21 & 33.77 & 56.37 & 222.25\\
+ \hline
+ OTLock & 88.06 & 22.61 & 18.23 & 18.52 & 19.59 & 167.01\\
+ \hline
+ Atomic & 87.69 & 22.4 & 18 & 18.02 & 17.99 & 164.1\\
+ \hline
+ Sum & 263.37 & 69.29 & 56.44 & 70.31 & 93.95 &\\
+ \hline
+ \hline
+\end{tabular}
+\end{center}
+
+\paragraph{Vertical Interpretation}The long lived lock appears to perform the most poorly. This is likely because once a thread has called it, it must play the filter game, whereas the one time lock returns immediately for threads that are too late, and they may move forward. The atomic lock uses hardware resources and naturally has an advantage.
+\paragraph{Horizontal Interpretation} For one thread, there is no competition, it rips through the lock() methods on it's own at about the same rate for each. When more than one thread is involved however, there is a somewhat significant speedup up until the number of thread matches the number of physical processor cores. My machine has 4 physical cores with hyperthreading, so context switching is still happening, but on a hardware optimized level instead. For 8 threads, I would expect to see a greater speedup on a true 8 core, non-hyper threaded machine. Once the number of threads exceeds the number of logical processors however, these threads begin competing more agressively for time on the scheduler, and so more time is spent on context switches. The exception to this is in the atomic locks, which is likely due to some optimization magic on either the hardware or JVM level.
 
 
 

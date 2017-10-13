@@ -19,7 +19,7 @@
 
 
 
-\section{Print Primes Varients}
+\section{Print Primes variants}
 For a range of 62.5 million to 125 million:
 \begin{center}
  \begin{tabular}{||c c c c c c c||}
@@ -40,6 +40,7 @@ For a range of 62.5 million to 125 million:
 
 \paragraph{Vertical Interpretation}The long lived lock appears to perform the most poorly. This is likely because once a thread has called it, it must play the filter game, whereas the one time lock returns immediately for threads that are too late, and they may move forward. The atomic lock uses hardware resources and naturally has an advantage.
 \paragraph{Horizontal Interpretation} For one thread, there is no competition, it rips through the lock() methods on it's own at about the same rate for each. When more than one thread is involved however, there is a somewhat significant speedup up until the number of thread matches the number of physical processor cores. My machine has 4 physical cores with hyperthreading, so context switching is still happening, but on a hardware optimized level instead. For 8 threads, I would expect to see a greater speedup on a true 8 core, non-hyper threaded machine. Once the number of threads exceeds the number of logical processors however, these threads begin competing more agressively for time on the scheduler, and so more time is spent on context switches. The exception to this is in the atomic locks, which is likely due to some optimization magic on either the hardware or JVM level.
+\paragraph{Variant 2} This variant failed to complete because of significant memory allocation costs. A new OTLock must be allocated for each number, in this case, 62.5 million OTLocks were created, occupying at least 8GB of memory. This causes java to run out of heap space unless the JVM is allowed more.
 
 
 
